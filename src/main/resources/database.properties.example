@@ -1,0 +1,15 @@
+# MySQL Database Configuration
+# Copy this file to database.properties and update with your credentials
+
+# Database Connection Settings
+db.url=jdbc:mysql://localhost:3306/food_ordering_system?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+db.username=root
+db.password=YOUR_MYSQL_PASSWORD_HERE
+
+# JDBC Driver
+db.driver=com.mysql.cj.jdbc.Driver
+
+# Connection Pool Settings (optional)
+db.maxConnections=10
+db.minConnections=2
+db.connectionTimeout=30000
