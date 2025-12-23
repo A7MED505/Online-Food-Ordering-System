@@ -15,10 +15,31 @@ public class User {
     private String passwordHash;
 
     public User(int id, String username, String email, String rawPassword) {
+        validateInput(username, email, rawPassword);
         this.id = id;
         this.username = username;
         this.email = email;
         setPassword(rawPassword);
+    }
+
+    private void validateInput(String username, String email, String password) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+        if (!isValidEmail(email)) {
+            throw new IllegalArgumentException("Email must be valid (e.g., user@example.com)");
+        }
+        if (password == null || password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters");
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(emailRegex);
     }
 
     public int getId() {

@@ -70,11 +70,11 @@ public class UserDAO {
                 String email = rs.getString("email");
                 String storedHash = rs.getString("password_hash");
                 
-                User user = new User(id, username, email, "");
-                user.setPassword(rawPassword);
+                // Create temporary user to verify password
+                User tempUser = new User(id, username, email, rawPassword);
                 
-                if (user.getPasswordHash().equals(storedHash)) {
-                    return user;
+                if (tempUser.getPasswordHash().equals(storedHash)) {
+                    return tempUser;
                 }
             }
             
@@ -102,7 +102,6 @@ public class UserDAO {
                 int id = rs.getInt("user_id");
                 String username = rs.getString("username");
                 String email = rs.getString("email");
-                String passwordHash = rs.getString("password_hash");
                 
                 User user = new User(id, username, email, "");
                 return user;
