@@ -1,7 +1,6 @@
 package com.foodordering.dao;
 
 import com.foodordering.models.User;
-import com.foodordering.models.Customer;
 import com.foodordering.utils.DatabaseConnection;
 import org.junit.jupiter.api.*;
 
