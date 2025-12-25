@@ -70,7 +70,12 @@ public class RegisterFrame extends JFrame {
         backButton = new JButton("Back");
 
         registerButton.addActionListener(new RegisterButtonListener());
-        backButton.addActionListener(e -> dispose());
+        backButton.addActionListener(e -> {
+            // Return to login screen
+            LoginFrame loginFrame = new LoginFrame();
+            loginFrame.setVisible(true);
+            dispose();
+        });
 
         buttonPanel.add(registerButton);
         buttonPanel.add(backButton);
@@ -111,6 +116,12 @@ public class RegisterFrame extends JFrame {
             if (success) {
                 showSuccess("Registration successful! User ID: " + newUser.getId());
                 clearFields();
+                // Navigate to login screen after successful registration
+                SwingUtilities.invokeLater(() -> {
+                    LoginFrame loginFrame = new LoginFrame();
+                    loginFrame.setVisible(true);
+                    dispose();
+                });
             } else {
                 showError("Username or email already exists");
             }

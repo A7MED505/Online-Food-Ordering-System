@@ -82,9 +82,12 @@ public class LoginFrame extends JFrame {
             Session.getInstance().login(user);
             showSuccess("Login successful! Welcome, " + user.getUsername());
             clearFields();
-            
-            // TODO: Open main application window
-            // dispose();
+
+            // Open main application window
+            MainAppFrame appFrame = new MainAppFrame(user);
+            appFrame.setVisible(true);
+            // Close login window
+            dispose();
         } else {
             showError("Invalid username or password");
         }
