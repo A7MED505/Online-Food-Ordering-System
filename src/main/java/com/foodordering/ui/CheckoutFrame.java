@@ -84,8 +84,10 @@ public class CheckoutFrame extends JFrame {
         Orderable method = buildSelectedPaymentMethod();
         int orderId = placeOrderForTest(method);
         if (orderId > 0) {
-            JOptionPane.showMessageDialog(this, "Order placed successfully! ID: " + orderId, "Success", JOptionPane.INFORMATION_MESSAGE);
             dispose();
+            // Open order summary frame
+            OrderSummaryFrame summaryFrame = new OrderSummaryFrame(orderId, orderDAO);
+            summaryFrame.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "Payment failed or cart empty.", "Error", JOptionPane.ERROR_MESSAGE);
         }
