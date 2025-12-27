@@ -2,6 +2,7 @@ package com.foodordering.ui;
 
 import com.foodordering.dao.MenuItemDAO;
 import com.foodordering.dao.RestaurantDAO;
+import com.foodordering.dao.ReviewDAO;
 import com.foodordering.models.Cart;
 import com.foodordering.models.Restaurant;
 
@@ -16,6 +17,7 @@ import java.util.List;
 public class RestaurantFrame extends JFrame {
     private final RestaurantDAO restaurantDAO;
     private final MenuItemDAO menuItemDAO;
+    private final ReviewDAO reviewDAO;
     private final Cart cart;
 
     private final DefaultListModel<String> restaurantListModel = new DefaultListModel<>();
@@ -30,6 +32,7 @@ public class RestaurantFrame extends JFrame {
         this.cart = cart;
         this.restaurantDAO = restaurantDAO;
         this.menuItemDAO = menuItemDAO;
+        this.reviewDAO = new ReviewDAO();
         initializeUI();
         loadRestaurants();
     }
@@ -44,11 +47,18 @@ public class RestaurantFrame extends JFrame {
         restaurantList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(restaurantList);
 
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         JButton viewMenuButton = new JButton("View Menu");
+        JButton viewReviewsButton = new JButton("⭐ Reviews");
+        
         viewMenuButton.addActionListener(e -> openSelectedMenu());
+        viewReviewsButton.addActionListener(e -> openSelectedReviews());
+
+        buttonPanel.add(viewMenuButton);
+        buttonPanel.add(viewReviewsButton);
 
         add(scrollPane, BorderLayout.CENTER);
-        add(viewMenuButton, BorderLayout.SOUTH);
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 
     public void loadRestaurants() {
@@ -68,6 +78,17 @@ public class RestaurantFrame extends JFrame {
         Restaurant selected = restaurants.get(idx);
         MenuFrame menuFrame = new MenuFrame(selected, cart, menuItemDAO);
         menuFrame.setVisible(true);
+    }
+
+    private void openSelectedReviews() {
+        int idx = restaurantList.getSelectedIndex();
+        if (idx < 0 || idx >= restaurants.size()) {
+            JOptionPane.showMessageDialog(this, "Please select a restaurant.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        Restaurant selected = restaurants.get(idx);
+        ReviewFrame reviewFrame = new ReviewFrame(selected, reviewDAO);
+        reviewFrame.setVisible(true);
     }
 
     // Testing helpers
