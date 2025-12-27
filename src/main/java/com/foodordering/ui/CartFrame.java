@@ -1,7 +1,9 @@
 package com.foodordering.ui;
 
+import com.foodordering.dao.OrderDAO;
 import com.foodordering.models.Cart;
 import com.foodordering.models.CartItem;
+import com.foodordering.services.Session;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -146,8 +148,12 @@ public class CartFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Cart is empty! Add items first.", "Info", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        JOptionPane.showMessageDialog(this, "Proceeding to checkout...", "Info", JOptionPane.INFORMATION_MESSAGE);
-        // TODO: Open CheckoutFrame when implemented
+        if (!Session.getInstance().isLoggedIn()) {
+            JOptionPane.showMessageDialog(this, "Please login to continue.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        CheckoutFrame checkout = new CheckoutFrame(Session.getInstance().getCurrentUser(), cart, new OrderDAO());
+        checkout.setVisible(true);
     }
 
     private void updateTotalLabel() {

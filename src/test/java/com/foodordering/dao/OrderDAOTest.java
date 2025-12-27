@@ -1,6 +1,5 @@
 package com.foodordering.dao;
 
-import com.foodordering.models.Customer;
 import com.foodordering.models.Order;
 import com.foodordering.models.OrderItem;
 import com.foodordering.models.User;
