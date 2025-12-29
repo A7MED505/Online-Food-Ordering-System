@@ -14,9 +14,7 @@ import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Integration tests for OrderSummaryFrame UI.
- */
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class OrderSummaryFrameTest {
 

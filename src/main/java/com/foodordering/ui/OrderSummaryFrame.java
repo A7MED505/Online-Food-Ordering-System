@@ -10,9 +10,6 @@ import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * Order Summary UI to display order confirmation and details.
- */
 public class OrderSummaryFrame extends JFrame {
     private Order order;
 

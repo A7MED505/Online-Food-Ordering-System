@@ -13,9 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Integration tests for ReviewDAO.
- */
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ReviewDAOTest {
 

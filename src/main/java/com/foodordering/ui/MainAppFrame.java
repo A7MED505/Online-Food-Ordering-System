@@ -1,7 +1,9 @@
 package com.foodordering.ui;
 
 import com.foodordering.dao.MenuItemDAO;
+import com.foodordering.dao.OrderDAO;
 import com.foodordering.dao.RestaurantDAO;
+import com.foodordering.dao.UserDAO;
 import com.foodordering.models.Cart;
 import com.foodordering.models.User;
 import com.foodordering.services.Session;
@@ -18,6 +20,8 @@ public class MainAppFrame extends JFrame {
     private final Cart cart;
     private final RestaurantDAO restaurantDAO;
     private final MenuItemDAO menuItemDAO;
+    private final UserDAO userDAO;
+    private final OrderDAO orderDAO;
 
     public MainAppFrame(User user) {
         this(user, new Cart(), new RestaurantDAO(), new MenuItemDAO());
@@ -28,6 +32,8 @@ public class MainAppFrame extends JFrame {
         this.cart = cart;
         this.restaurantDAO = restaurantDAO;
         this.menuItemDAO = menuItemDAO;
+        this.userDAO = new UserDAO();
+        this.orderDAO = new OrderDAO();
         initializeUI();
     }
 
@@ -47,7 +53,7 @@ public class MainAppFrame extends JFrame {
         mainPanel.add(welcome, BorderLayout.NORTH);
 
         // Center panel with buttons
-        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        JPanel centerPanel = new JPanel(new GridLayout(3, 1, 10, 10));
 
         JButton browseButton = new JButton("🏪 Browse Restaurants");
         browseButton.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -57,8 +63,13 @@ public class MainAppFrame extends JFrame {
         cartButton.setFont(new Font("Arial", Font.PLAIN, 14));
         cartButton.addActionListener(e -> openCartView());
 
+        JButton profileButton = new JButton("👤 My Profile");
+        profileButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        profileButton.addActionListener(e -> openProfileView());
+
         centerPanel.add(browseButton);
         centerPanel.add(cartButton);
+        centerPanel.add(profileButton);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
         // Bottom panel with logout
@@ -86,6 +97,11 @@ public class MainAppFrame extends JFrame {
         LoginFrame loginFrame = new LoginFrame();
         loginFrame.setVisible(true);
         dispose();
+    }
+
+    private void openProfileView() {
+        ProfileFrame profileFrame = new ProfileFrame(currentUser, userDAO, orderDAO);
+        profileFrame.setVisible(true);
     }
 
     // Testing helpers
