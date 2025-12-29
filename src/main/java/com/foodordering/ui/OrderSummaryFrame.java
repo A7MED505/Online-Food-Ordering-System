@@ -14,7 +14,6 @@ import java.util.Date;
  * Order Summary UI to display order confirmation and details.
  */
 public class OrderSummaryFrame extends JFrame {
-    private final OrderDAO orderDAO;
     private Order order;
 
     private final String[] columns = {"Item", "Unit Price", "Qty", "Subtotal"};
@@ -28,17 +27,16 @@ public class OrderSummaryFrame extends JFrame {
     private final JLabel dateLabel = new JLabel();
     private final JTextArea confirmationArea = new JTextArea();
 
-    public OrderSummaryFrame(int orderId, OrderDAO orderDAO) {
-        this.orderDAO = orderDAO;
+    public OrderSummaryFrame(int orderId) {
+        OrderDAO orderDAO = new OrderDAO();
         this.order = orderDAO.getOrderById(orderId);
         initializeUI();
         loadOrderDetails();
     }
 
     // For testing: inject order directly
-    public OrderSummaryFrame(Order order, OrderDAO orderDAO) {
+    public OrderSummaryFrame(Order order) {
         this.order = order;
-        this.orderDAO = orderDAO;
         initializeUI();
         loadOrderDetails();
     }

@@ -1,6 +1,5 @@
 package com.foodordering.dao;
 
-import com.foodordering.models.Customer;
 import com.foodordering.models.Restaurant;
 import com.foodordering.models.Review;
 import com.foodordering.models.User;
@@ -8,7 +7,6 @@ import com.foodordering.utils.DatabaseConnection;
 import org.junit.jupiter.api.*;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;

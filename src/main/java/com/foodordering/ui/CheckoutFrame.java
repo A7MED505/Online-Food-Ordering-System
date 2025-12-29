@@ -1,9 +1,11 @@
 package com.foodordering.ui;
 
 import com.foodordering.dao.OrderDAO;
+import com.foodordering.dao.CouponDAO;
 import com.foodordering.interfaces.Orderable;
 import com.foodordering.models.Cart;
 import com.foodordering.models.CartItem;
+import com.foodordering.models.Coupon;
 import com.foodordering.models.Order;
 import com.foodordering.models.OrderItem;
 import com.foodordering.models.User;
@@ -26,6 +28,7 @@ public class CheckoutFrame extends JFrame {
     private final User currentUser;
     private final Cart cart;
     private final OrderDAO orderDAO;
+    private final CouponDAO couponDAO = new CouponDAO();
     private final PaymentService paymentService = new PaymentService();
 
     private int lastOrderId;
@@ -35,7 +38,14 @@ public class CheckoutFrame extends JFrame {
         @Override public boolean isCellEditable(int r, int c) { return false; }
     };
     private final JTable itemsTable = new JTable(tableModel);
+    
+    private final JLabel subtotalLabel = new JLabel("Subtotal: $0.00");
+    private final JLabel discountLabel = new JLabel("Discount: $0.00");
     private final JLabel totalLabel = new JLabel("Total: $0.00");
+    
+    private final JTextField couponField = new JTextField(10);
+    private final JButton applyCouponBtn = new JButton("Apply Coupon");
+    
     private final JComboBox<String> paymentCombo = new JComboBox<>(new String[]{"Credit Card", "Debit Card", "Cash"});
 
     public CheckoutFrame(User currentUser, Cart cart, OrderDAO orderDAO) {
@@ -48,7 +58,7 @@ public class CheckoutFrame extends JFrame {
 
     private void initializeUI() {
         setTitle("Checkout");
-        setSize(600, 450);
+        setSize(700, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
@@ -56,10 +66,29 @@ public class CheckoutFrame extends JFrame {
         add(new JScrollPane(itemsTable), BorderLayout.CENTER);
 
         JPanel bottom = new JPanel(new BorderLayout(8, 8));
-        JPanel summary = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        
+        // Summary panel with prices
+        JPanel summary = new JPanel(new GridLayout(4, 1, 0, 5));
+        summary.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        subtotalLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        discountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        discountLabel.setForeground(new Color(0, 128, 0));
         totalLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        
+        summary.add(subtotalLabel);
+        summary.add(discountLabel);
+        summary.add(new JSeparator());
         summary.add(totalLabel);
 
+        // Coupon panel
+        JPanel couponPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        couponPanel.add(new JLabel("Coupon Code:"));
+        couponPanel.add(couponField);
+        applyCouponBtn.addActionListener(e -> applyCoupon());
+        couponPanel.add(applyCouponBtn);
+
+        // Payment method panel
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actions.add(new JLabel("Payment Method:"));
         actions.add(paymentCombo);
@@ -68,8 +97,28 @@ public class CheckoutFrame extends JFrame {
         actions.add(placeOrderBtn);
 
         bottom.add(summary, BorderLayout.NORTH);
+        bottom.add(couponPanel, BorderLayout.CENTER);
         bottom.add(actions, BorderLayout.SOUTH);
         add(bottom, BorderLayout.SOUTH);
+    }
+
+    private void applyCoupon() {
+        String code = couponField.getText().trim();
+        if (code.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a coupon code.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Coupon coupon = couponDAO.getCouponByCode(code);
+        if (coupon == null || !coupon.isValid()) {
+            JOptionPane.showMessageDialog(this, "Invalid or expired coupon code.", "Error", JOptionPane.ERROR_MESSAGE);
+            couponField.setText("");
+            cart.applyCoupon(null);
+        } else {
+            cart.applyCoupon(coupon);
+            JOptionPane.showMessageDialog(this, "Coupon applied! " + (int)coupon.getValue() + "% discount.", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
+        loadCartItems();
     }
 
     public void loadCartItems() {
@@ -77,7 +126,15 @@ public class CheckoutFrame extends JFrame {
         for (CartItem ci : cart.getItems()) {
             tableModel.addRow(new Object[]{ci.getName(), ci.getUnitPrice(), ci.getQuantity(), ci.getSubtotal()});
         }
-        totalLabel.setText(String.format("Total: $%.2f", cart.calculateTotal()));
+        
+        // Calculate and display prices
+        double subtotal = cart.getItems().stream().mapToDouble(CartItem::getSubtotal).sum();
+        double discount = cart.getAppliedCoupon() != null ? cart.getAppliedCoupon().computeDiscount(subtotal) : 0;
+        double total = subtotal - discount;
+        
+        subtotalLabel.setText(String.format("Subtotal: $%.2f", subtotal));
+        discountLabel.setText(String.format("Discount: -$%.2f", discount));
+        totalLabel.setText(String.format("Total: $%.2f", Math.max(0, total)));
     }
 
     private void placeOrderFromUI() {
@@ -86,7 +143,7 @@ public class CheckoutFrame extends JFrame {
         if (orderId > 0) {
             dispose();
             // Open order summary frame
-            OrderSummaryFrame summaryFrame = new OrderSummaryFrame(orderId, orderDAO);
+            OrderSummaryFrame summaryFrame = new OrderSummaryFrame(orderId);
             summaryFrame.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "Payment failed or cart empty.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -104,10 +161,6 @@ public class CheckoutFrame extends JFrame {
         }
     }
 
-    /**
-     * Core placing order logic used by UI and tests.
-     * Returns created order id (>0) if success, otherwise 0.
-     */
     public int placeOrderForTest(Orderable paymentMethod) {
         double total = cart.calculateTotal();
         if (cart.getItems().isEmpty()) return 0;
@@ -154,10 +207,6 @@ public class CheckoutFrame extends JFrame {
         return 0;
     }
 
-    /**
-     * In this simplified version we assume all items belong to same restaurant
-     * and return the restaurant id of the first item, or 0 if unavailable.
-     */
     private int inferRestaurantIdFromCart() {
         if (cart.getItems().isEmpty()) return 0;
         int firstItemId = cart.getItems().get(0).getItemId();

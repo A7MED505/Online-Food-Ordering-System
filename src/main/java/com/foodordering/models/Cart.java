@@ -50,6 +50,10 @@ public class Cart {
         this.appliedCoupon = coupon;
     }
 
+    public Coupon getAppliedCoupon() {
+        return appliedCoupon;
+    }
+
     public double calculateTotal() {
         double subtotal = items.values().stream()
                 .mapToDouble(CartItem::getSubtotal).sum();

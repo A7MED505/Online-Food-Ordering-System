@@ -105,7 +105,7 @@ class OrderSummaryFrameTest {
         assertNotNull(order, "Order should exist");
 
         // Create OrderSummaryFrame
-        OrderSummaryFrame frame = new OrderSummaryFrame(order, orderDAO);
+        OrderSummaryFrame frame = new OrderSummaryFrame(order);
         assertNotNull(frame, "Frame should be created");
 
         // Verify order ID label
@@ -135,7 +135,7 @@ class OrderSummaryFrameTest {
         assertNotNull(order, "Order should exist");
 
         // Create OrderSummaryFrame
-        OrderSummaryFrame frame = new OrderSummaryFrame(order, orderDAO);
+        OrderSummaryFrame frame = new OrderSummaryFrame(order);
 
         // Verify confirmation message
         String confirmationText = frame.getConfirmationText();
