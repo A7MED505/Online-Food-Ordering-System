@@ -1,8 +1,11 @@
 package com.foodordering.ui;
 
-import com.foodordering.dao.UserDAO;
+import com.foodordering.exceptions.AuthenticationException;
+import com.foodordering.exceptions.DatabaseException;
+import com.foodordering.exceptions.ValidationException;
 import com.foodordering.models.User;
 import com.foodordering.services.Session;
+import com.foodordering.services.UserService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,10 +21,10 @@ public class LoginFrame extends JFrame {
     private JButton loginButton;
     private JButton registerButton;
     private JLabel messageLabel;
-    private UserDAO userDAO;
+    private UserService userService;
 
     public LoginFrame() {
-        this.userDAO = new UserDAO();
+        this.userService = new UserService();
         initializeUI();
     }
 
@@ -32,25 +35,25 @@ public class LoginFrame extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(4, 2, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // Form panel (username/password)
+        JPanel formPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
 
-        // Username
-        panel.add(new JLabel("Username:"));
+        formPanel.add(new JLabel("Username:"));
         usernameField = new JTextField();
-        panel.add(usernameField);
+        formPanel.add(usernameField);
 
-        // Password
-        panel.add(new JLabel("Password:"));
+        formPanel.add(new JLabel("Password:"));
         passwordField = new JPasswordField();
-        panel.add(passwordField);
+        formPanel.add(passwordField);
 
-        // Message label
+        // Message panel (spans full width)
         messageLabel = new JLabel("");
         messageLabel.setForeground(Color.RED);
-        panel.add(messageLabel);
-        panel.add(new JLabel("")); // Empty space
+        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JPanel messagePanel = new JPanel(new BorderLayout());
+        messagePanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
+        messagePanel.add(messageLabel, BorderLayout.CENTER);
 
         // Buttons
         JPanel buttonPanel = new JPanel();
@@ -63,7 +66,12 @@ public class LoginFrame extends JFrame {
         buttonPanel.add(loginButton);
         buttonPanel.add(registerButton);
 
-        add(panel, BorderLayout.CENTER);
+        // Compose main layout
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(formPanel, BorderLayout.NORTH);
+        centerPanel.add(messagePanel, BorderLayout.CENTER);
+
+        add(centerPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
@@ -76,9 +84,8 @@ public class LoginFrame extends JFrame {
             return;
         }
 
-        User user = userDAO.login(username, password);
-
-        if (user != null) {
+        try {
+            User user = userService.loginUser(username, password);
             Session.getInstance().login(user);
             showSuccess("Login successful! Welcome, " + user.getUsername());
             clearFields();
@@ -88,8 +95,12 @@ public class LoginFrame extends JFrame {
             appFrame.setVisible(true);
             // Close login window
             dispose();
-        } else {
-            showError("Invalid username or password");
+        } catch (ValidationException | AuthenticationException e) {
+            showError(e.getMessage());
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Login Error", JOptionPane.ERROR_MESSAGE);
+        } catch (DatabaseException e) {
+            showError("A system error occurred. Please try again later.");
+            JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage(), "System Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -103,11 +114,13 @@ public class LoginFrame extends JFrame {
     private void showError(String message) {
         messageLabel.setForeground(Color.RED);
         messageLabel.setText(message);
+        messageLabel.setVisible(true);
     }
 
     private void showSuccess(String message) {
         messageLabel.setForeground(new Color(0, 128, 0));
         messageLabel.setText(message);
+        messageLabel.setVisible(true);
     }
 
     private void clearFields() {

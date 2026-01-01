@@ -136,4 +136,26 @@ public class UserDAO {
         
         return false;
     }
+
+    /**
+     * Update user email by user id.
+     * @param userId user id
+     * @param newEmail new email
+     * @return true if updated
+     */
+    public boolean updateUserEmail(int userId, String newEmail) {
+        String sql = "UPDATE users SET email = ? WHERE user_id = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, newEmail);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLIntegrityConstraintViolationException e) {
+            // email already exists
+            return false;
+        } catch (SQLException e) {
+            System.err.println("Error updating user email: " + e.getMessage());
+            return false;
+        }
+    }
 }
