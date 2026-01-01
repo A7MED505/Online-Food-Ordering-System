@@ -15,7 +15,6 @@ import java.util.List;
 
 public class ProfileFrame extends JFrame {
     private final User currentUser;
-    private final UserDAO userDAO;
     private final OrderDAO orderDAO;
 
     // User info fields
@@ -36,7 +35,6 @@ public class ProfileFrame extends JFrame {
 
     public ProfileFrame(User currentUser, UserDAO userDAO, OrderDAO orderDAO) {
         this.currentUser = currentUser;
-        this.userDAO = userDAO;
         this.orderDAO = orderDAO;
         initializeUI();
         loadUserInfo();
