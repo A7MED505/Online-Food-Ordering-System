@@ -42,7 +42,7 @@ classDiagram
     class Order {
       +id: int
       +status: OrderStatus
-      +createdAt: LocalDateTime
+      +createdAt: datetime
       +total(): double
     }
 
@@ -67,14 +67,16 @@ classDiagram
 
     Customer "1" o-- "1" Cart
 
-    %% Interfaces & Polymorphism
-    interface Orderable {
+    %% Interfaces
+    class Orderable {
+      <<interface>>
       +placeOrder(order: Order): boolean
     }
 
     Orderable <|.. Order
 
-    interface Payment {
+    class Payment {
+      <<interface>>
       +process(amount: double): boolean
     }
 
@@ -86,14 +88,15 @@ classDiagram
     Payment <|.. DebitCardPayment
     Payment <|.. CashPayment
 
-    %% Enums
+    %% Enum
     class OrderStatus {
-      <<enumeration>>
+      <<enum>>
       PENDING
       CONFIRMED
       SHIPPED
       DELIVERED
     }
+
 ```
 
 Notes:
